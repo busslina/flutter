@@ -5,24 +5,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('precedingScrollExtent is reported as infinity for Sliver of unknown size', (WidgetTester tester) async {
+  testWidgets('precedingScrollExtent is reported as infinity for Sliver of unknown size', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            SliverList.builder(
+              itemBuilder: (BuildContext context, int index) {
                 if (index < 100) {
                   return const SizedBox(width: double.infinity, height: 150.0);
                 } else {
                   return null;
                 }
-              }),
+              },
             ),
             const SliverToBoxAdapter(
               key: Key('final_sliver'),

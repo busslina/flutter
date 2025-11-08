@@ -5,20 +5,19 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
-    expect(AnimationStyle(), AnimationStyle().copyWith());
-    expect(AnimationStyle().hashCode, AnimationStyle().copyWith().hashCode);
+    expect(const AnimationStyle(), const AnimationStyle().copyWith());
+    expect(const AnimationStyle().hashCode, const AnimationStyle().copyWith().hashCode);
   });
 
-  testWidgetsWithLeakTracking('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
-    final AnimationStyle original = AnimationStyle(
+  testWidgets('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
+    const AnimationStyle original = AnimationStyle(
       curve: Curves.ease,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
-      reverseDuration: const Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
     );
     final AnimationStyle copy = original.copyWith(
       curve: Curves.linear,
@@ -34,22 +33,22 @@ void main() {
 
   test('AnimationStyle.lerp identical a,b', () {
     expect(AnimationStyle.lerp(null, null, 0), null);
-    final AnimationStyle data = AnimationStyle();
+    const AnimationStyle data = AnimationStyle();
     expect(identical(AnimationStyle.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
-    final AnimationStyle a = AnimationStyle(
+  testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
+    const AnimationStyle a = AnimationStyle(
       curve: Curves.ease,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
-      reverseDuration: const Duration(seconds: 1),
+      reverseDuration: Duration(seconds: 1),
     );
-    final AnimationStyle b = AnimationStyle(
+    const AnimationStyle b = AnimationStyle(
       curve: Curves.linear,
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: 2),
       reverseCurve: Curves.linear,
-      reverseDuration: const Duration(seconds: 2),
+      reverseDuration: Duration(seconds: 2),
     );
 
     expect(AnimationStyle.lerp(a, b, 0), a);
@@ -57,37 +56,39 @@ void main() {
     expect(AnimationStyle.lerp(a, b, 1.0), b);
   });
 
-  testWidgetsWithLeakTracking('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    AnimationStyle().debugFillProperties(builder);
+    const AnimationStyle().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    AnimationStyle(
+    const AnimationStyle(
       curve: Curves.easeInOut,
-      duration: const Duration(seconds: 1),
+      duration: Duration(seconds: 1),
       reverseCurve: Curves.bounceInOut,
-      reverseDuration: const Duration(seconds: 2),
+      reverseDuration: Duration(seconds: 2),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'curve: Cubic(0.42, 0.00, 0.58, 1.00)',
       'duration: 0:00:01.000000',
       'reverseCurve: _BounceInOutCurve',
-      'reverseDuration: 0:00:02.000000'
+      'reverseDuration: 0:00:02.000000',
     ]);
   });
 }

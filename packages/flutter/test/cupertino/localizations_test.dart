@@ -4,10 +4,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
+  testWidgets('English translations exist for all CupertinoLocalization properties', (
+    WidgetTester tester,
+  ) async {
     const CupertinoLocalizations localizations = DefaultCupertinoLocalizations();
 
     expect(localizations.datePickerYear(2018), isNotNull);
@@ -36,29 +37,42 @@ void main() {
     expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
     expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
     expect(localizations.clearButtonLabel, isNotNull);
+    expect(localizations.cancelButtonLabel, isNotNull);
+    expect(localizations.backButtonLabel, isNotNull);
+
+    expect(localizations.expansionTileExpandedHint, isNotNull);
+    expect(localizations.expansionTileCollapsedHint, isNotNull);
+    expect(localizations.expansionTileExpandedTapHint, isNotNull);
+    expect(localizations.expansionTileCollapsedTapHint, isNotNull);
+    expect(localizations.expandedHint, isNotNull);
+    expect(localizations.collapsedHint, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('CupertinoLocalizations.of throws', (WidgetTester tester) async {
+  testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
     await tester.pumpWidget(
       Container(
         key: noLocalizationsAvailable,
-        child: CupertinoApp(
-          home: Container(
-            key: localizationsAvailable,
-          ),
+        child: CupertinoApp(home: Container(key: localizationsAvailable)),
+      ),
+    );
+
+    expect(
+      () => CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!),
+      throwsA(
+        isAssertionError.having(
+          (AssertionError e) => e.message,
+          'message',
+          contains('No CupertinoLocalizations found'),
         ),
       ),
     );
 
-    expect(() => CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No CupertinoLocalizations found'),
-    )));
-
-    expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!), isA<CupertinoLocalizations>());
+    expect(
+      CupertinoLocalizations.of(localizationsAvailable.currentContext!),
+      isA<CupertinoLocalizations>(),
+    );
   });
 }

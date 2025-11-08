@@ -4,12 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('positions itself at the anchor', (WidgetTester tester) async {
+  testWidgets('positions itself at the anchor', (WidgetTester tester) async {
     // An arbitrary point on the screen to position at.
     const Offset anchor = Offset(30.0, 40.0);
 
@@ -19,19 +18,29 @@ void main() {
           child: DesktopTextSelectionToolbar(
             anchor: anchor,
             children: <Widget>[
-              DesktopTextSelectionToolbarButton(
-                child: const Text('Tap me'),
-                onPressed: () {},
-              ),
+              DesktopTextSelectionToolbarButton(child: const Text('Tap me'), onPressed: () {}),
             ],
           ),
         ),
       ),
     );
 
-    expect(
-      tester.getTopLeft(find.byType(DesktopTextSelectionToolbarButton)),
-      anchor,
+    expect(tester.getTopLeft(find.byType(DesktopTextSelectionToolbarButton)), anchor);
+  });
+
+  testWidgets('DesktopTextSelectionToolbar renders at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DesktopTextSelectionToolbar(
+              anchor: const Offset(10, 10),
+              children: const <Widget>[Text('X')],
+            ),
+          ),
+        ),
+      ),
     );
+    expect(tester.getSize(find.byType(DesktopTextSelectionToolbar)).isEmpty, isTrue);
   });
 }

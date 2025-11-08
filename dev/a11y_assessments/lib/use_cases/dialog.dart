@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
+import '../utils.dart';
 import 'use_cases.dart';
 
 class DialogUseCase extends UseCase {
+  DialogUseCase() : super(useCaseCategory: UseCaseCategory.core);
 
   @override
   String get name => 'Dialog';
@@ -15,21 +16,23 @@ class DialogUseCase extends UseCase {
   String get route => '/dialog';
 
   @override
-  Widget build(BuildContext context) => const _MainWidget();
+  Widget build(BuildContext context) => _MainWidget();
 }
 
 class _MainWidget extends StatelessWidget {
-  const _MainWidget();
+  _MainWidget();
+
+  final String pageTitle = getUseCaseName(DialogUseCase());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Dialog'),
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
       body: Center(
         child: TextButton(
-          autofocus: true,
           onPressed: () => showDialog<String>(
             context: context,
             builder: (BuildContext context) => Dialog(
@@ -41,12 +44,23 @@ class _MainWidget extends StatelessWidget {
                   children: <Widget>[
                     const Text('This is a typical dialog.'),
                     const SizedBox(height: 15),
-                    TextButton(
-                      autofocus: true,
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Close'),
+                    Row(
+                      children: <Widget>[
+                        TextButton(
+                          key: const Key('OK Button'),
+                          autofocus: true,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('OK'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

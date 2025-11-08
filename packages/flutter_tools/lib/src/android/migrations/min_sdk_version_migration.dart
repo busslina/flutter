@@ -13,21 +13,25 @@ import '../gradle_utils.dart';
 /// that instead of using a value defaults to the version defined by the
 /// flutter sdk as the minimum supported by flutter.
 @visibleForTesting
-const String replacementMinSdkText = 'minSdkVersion flutter.minSdkVersion';
+const replacementMinSdkText = 'minSdkVersion flutter.minSdkVersion';
 
 @visibleForTesting
-const String appGradleNotFoundWarning = 'Module level build.gradle file not found, skipping minSdkVersion migration.';
+const groovyReplacementWithEquals = 'minSdkVersion = flutter.minSdkVersion';
+
+@visibleForTesting
+const kotlinReplacementMinSdkText = 'minSdk = flutter.minSdkVersion';
+
+@visibleForTesting
+const appGradleNotFoundWarning =
+    'Module level build.gradle file not found, skipping minSdkVersion migration.';
 
 class MinSdkVersionMigration extends ProjectMigrator {
-  MinSdkVersionMigration(
-      AndroidProject project,
-      super.logger,
-  ) : _project = project;
+  MinSdkVersionMigration(AndroidProject project, super.logger) : _project = project;
 
   final AndroidProject _project;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     // Skip applying migration in modules as the FlutterExtension is not applied.
     if (_project.isModule) {
       return;
@@ -42,6 +46,14 @@ class MinSdkVersionMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    return fileContents.replaceAll(jellyBeanMinSdkVersionMatch, replacementMinSdkText);
+    if (_project.appGradleFile.path.endsWith('.kts')) {
+      // For Kotlin Gradle files, only the equals syntax is valid and we should use 'minSdk'.
+      return fileContents.replaceAll(tooOldMinSdkVersionEqualsMatch, kotlinReplacementMinSdkText);
+    }
+
+    // For Groovy Gradle files, both space and equals syntax are valid, and the property name is 'minSdkVersion'.
+    return fileContents
+        .replaceAll(tooOldMinSdkVersionSpaceMatch, replacementMinSdkText)
+        .replaceAll(tooOldMinSdkVersionEqualsMatch, groovyReplacementWithEquals);
   }
 }

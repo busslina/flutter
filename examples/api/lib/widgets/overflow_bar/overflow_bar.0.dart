@@ -16,9 +16,7 @@ class OverflowBarExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OverflowBar Sample')),
-        body: const Center(
-          child: OverflowBarExample(),
-        ),
+        body: const Center(child: OverflowBarExample()),
       ),
     );
   }
@@ -32,7 +30,7 @@ class OverflowBarExample extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(16),
-      color: Colors.black.withOpacity(0.15),
+      color: Colors.black.withValues(alpha: 0.15),
       child: Material(
         color: Colors.white,
         elevation: 24,

@@ -4,34 +4,31 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('GridTile control test', (WidgetTester tester) async {
+  testWidgets('GridTile control test', (WidgetTester tester) async {
     final Key headerKey = UniqueKey();
     final Key footerKey = UniqueKey();
 
-    await tester.pumpWidget(MaterialApp(
-      home: GridTile(
-        header: GridTileBar(
-          key: headerKey,
-          leading: const Icon(Icons.thumb_up),
-          title: const Text('Header'),
-          subtitle: const Text('Subtitle'),
-          trailing: const Icon(Icons.thumb_up),
-        ),
-        footer: GridTileBar(
-          key: footerKey,
-          title: const Text('Footer'),
-          backgroundColor: Colors.black38,
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.green[500],
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GridTile(
+          header: GridTileBar(
+            key: headerKey,
+            leading: const Icon(Icons.thumb_up),
+            title: const Text('Header'),
+            subtitle: const Text('Subtitle'),
+            trailing: const Icon(Icons.thumb_up),
           ),
+          footer: GridTileBar(
+            key: footerKey,
+            title: const Text('Footer'),
+            backgroundColor: Colors.black38,
+          ),
+          child: DecoratedBox(decoration: BoxDecoration(color: Colors.green[500])),
         ),
       ),
-    ));
+    );
 
     expect(find.text('Header'), findsOneWidget);
     expect(find.text('Footer'), findsOneWidget);
@@ -49,5 +46,27 @@ void main() {
     );
 
     expect(find.text('Simple'), findsOneWidget);
+  });
+
+  testWidgets('GridTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: GridTile(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(GridTile)), Size.zero);
+  });
+
+  testWidgets('GridTileBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: GridTileBar(title: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(GridTileBar)), Size.zero);
   });
 }

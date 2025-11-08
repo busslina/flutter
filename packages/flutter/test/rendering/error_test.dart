@@ -5,13 +5,12 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
   const String errorMessage = 'Some error message';
 
-  testWidgetsWithLeakTracking('test draw error paragraph', (WidgetTester tester) async {
+  testWidgets('test draw error paragraph', (WidgetTester tester) async {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
     expect(
       find.byType(ErrorWidget),
@@ -34,7 +33,11 @@ void main() {
     await tester.pumpWidget(Center(child: SizedBox(height: 100.0, child: error)));
     expect(tester.takeException(), null);
 
-    await tester.pumpWidget(Center(child: SizedBox(key: UniqueKey(), height: 100.0, child: error)));
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(key: UniqueKey(), height: 100.0, child: error),
+      ),
+    );
     expect(tester.takeException(), 'pillow');
     expect(
       find.byType(ErrorWidget),

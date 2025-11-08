@@ -18,19 +18,12 @@ import 'recorder.dart';
 // WASM codecs execute on the main thread and block the UI, leading to jank,
 // but the browser's WebCodecs API is asynchronous running on a separate thread
 // and does not jank. However, the benchmark result may be the same.
-//
-// This benchmark does not support the HTML renderer because the HTML renderer
-// cannot decode image frames (it always returns 1 dummy frame, even for
-// animated images).
 class BenchImageDecoding extends RawRecorder {
-  BenchImageDecoding() : super(
-    name: benchmarkName,
-    useCustomWarmUp: true,
-  );
+  BenchImageDecoding() : super(name: benchmarkName, useCustomWarmUp: true);
 
   static const String benchmarkName = 'bench_image_decoding';
 
-  // These test images are taken from https://github.com/flutter/flutter_gallery_assets/tree/master/lib/splash_effects
+  // These test images are taken from https://github.com/flutter/flutter_gallery_assets/tree/main/lib/splash_effects
   static const List<String> _imageUrls = <String>[
     'assets/packages/flutter_gallery_assets/splash_effects/splash_effect_1.gif',
     'assets/packages/flutter_gallery_assets/splash_effects/splash_effect_2.gif',
@@ -66,8 +59,7 @@ class BenchImageDecoding extends RawRecorder {
   Future<void> body(Profile profile) async {
     await profile.recordAsync('recordImageDecode', () async {
       final List<Future<void>> allDecodes = <Future<void>>[
-        for (final Uint8List data in _imageData)
-          _decodeImage(data),
+        for (final Uint8List data in _imageData) _decodeImage(data),
       ];
       await Future.wait(allDecodes);
     }, reported: true);
@@ -88,7 +80,7 @@ Future<void> _decodeImage(Uint8List data) async {
   if (codec.frameCount < decodeFrameCount) {
     throw Exception(
       'Test image contains too few frames for this benchmark (${codec.frameCount}). '
-      'Choose a test image with at least $decodeFrameCount frames.'
+      'Choose a test image with at least $decodeFrameCount frames.',
     );
   }
   for (int i = 0; i < decodeFrameCount; i++) {
