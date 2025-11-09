@@ -13,6 +13,7 @@ library;
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
+import 'dart:io';
 import 'dart:ui'
     show
         AppLifecycleState,
@@ -270,6 +271,8 @@ mixin SchedulerBinding on BindingBase {
 
   final List<TimingsCallback> _timingsCallbacks = <TimingsCallback>[];
 
+  static bool disableFramesOnAppLifecycleStateHidden = true;
+
   /// Add a [TimingsCallback] that receives [FrameTiming] sent from
   /// the engine.
   ///
@@ -421,6 +424,10 @@ mixin SchedulerBinding on BindingBase {
       case AppLifecycleState.inactive:
         _setFramesEnabledState(true);
       case AppLifecycleState.hidden:
+        _setFramesEnabledState(
+          (Platform.isLinux || Platform.isWindows || Platform.isMacOS) &&
+              !disableFramesOnAppLifecycleStateHidden,
+        );
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         _setFramesEnabledState(false);
