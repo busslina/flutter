@@ -13,7 +13,6 @@ library;
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline, TimelineTask;
-import 'dart:io';
 import 'dart:ui'
     show
         AppLifecycleState,
@@ -425,7 +424,10 @@ mixin SchedulerBinding on BindingBase {
         _setFramesEnabledState(true);
       case AppLifecycleState.hidden:
         _setFramesEnabledState(
-          (Platform.isLinux || Platform.isWindows || Platform.isMacOS) &&
+          !kIsWeb &&
+              (defaultTargetPlatform == TargetPlatform.linux ||
+                  defaultTargetPlatform == TargetPlatform.windows ||
+                  defaultTargetPlatform == TargetPlatform.macOS) &&
               !disableFramesOnAppLifecycleStateHidden,
         );
       case AppLifecycleState.paused:
