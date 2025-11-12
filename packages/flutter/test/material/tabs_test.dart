@@ -9346,4 +9346,45 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('TabPageSelectorIndicator does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: TabPageSelectorIndicator(
+              backgroundColor: Colors.red,
+              borderColor: Colors.blue,
+              size: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TabPageSelectorIndicator)), Size.zero);
+  });
+
+  testWidgets('DefaultTabController does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: DefaultTabController(length: 2, child: Scaffold())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DefaultTabController)), Size.zero);
+  });
+
+  testWidgets('Tab does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(child: Tab(child: Text('X'))),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Tab)), Size.zero);
+  });
 }
