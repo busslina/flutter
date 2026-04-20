@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart' show throwToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -92,6 +91,9 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+          buildDataAssets: true,
+          recordedUsesFile: null,
         );
         await installCodeAssets(
           dartHookResult: result,
@@ -100,6 +102,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/android/'),
         );
         expect(
           (globals.logger as BufferLogger).traceText,
@@ -133,6 +136,9 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(),
+        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+        buildDataAssets: true,
+        recordedUsesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -149,7 +155,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificHooks(
+        await runFlutterSpecificHooks(
           environmentDefines: <String, String>{
             kBuildMode: BuildMode.debug.cliName,
             kMinSdkVersion: minSdkVersion,
@@ -158,8 +164,11 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+          buildDataAssets: true,
+          recordedUsesFile: null,
         ),
-        throwsToolExit(message: 'Android NDK Clang could not be found.'),
+        isA<DartHooksResult>(),
       );
     },
   );
@@ -169,6 +178,5 @@ class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
   _BuildRunnerWithoutNdk({super.packagesWithNativeAssetsResult = const <String>[]});
 
   @override
-  CCompilerConfig? get ndkCCompilerConfigResult =>
-      throwToolExit('Android NDK Clang could not be found.');
+  CCompilerConfig? get ndkCCompilerConfigResult => null;
 }

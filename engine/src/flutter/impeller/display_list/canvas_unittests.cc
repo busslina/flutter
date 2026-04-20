@@ -332,8 +332,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = flutter::DlRuntimeEffectImpeller::Make(runtime_stage);
@@ -382,7 +381,8 @@ TEST_P(AiksTest, SupportsBlitToOnscreen) {
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
-  if (GetBackend() != PlaygroundBackend::kMetal) {
+  if (GetBackend() != PlaygroundBackend::kMetal &&
+      GetBackend() != PlaygroundBackend::kMetalSDF) {
     EXPECT_FALSE(canvas->SupportsBlitToOnscreen());
   } else {
     EXPECT_TRUE(canvas->SupportsBlitToOnscreen());
@@ -409,11 +409,6 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
         flutter::DlTileMode::kClamp);
   }
 
-  auto RectMakeCenterHalfSize = [](Point center, Point half_size) {
-    Size size(half_size.x * 2, half_size.y * 2);
-    return Rect::MakeOriginSize(center - half_size, size);
-  };
-
   RenderCallback callback = [&](RenderTarget& render_target) {
     ContentContext context(GetContext(), nullptr);
     Canvas canvas(context, render_target, true, false);
@@ -436,8 +431,8 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
         ctm * (right_center + default_size / 2), 30, Color::White());
     Point right_reference = i_ctm * DrawPlaygroundPoint(right_reference_var);
     Point half_size = (right_reference - right_center).Abs();
-    Rect left_bounds = RectMakeCenterHalfSize(left_center, half_size);
-    Rect right_bounds = RectMakeCenterHalfSize(right_center, half_size);
+    Rect left_bounds = Rect::MakeEllipseBounds(left_center, half_size);
+    Rect right_bounds = Rect::MakeEllipseBounds(right_center, half_size);
 
     Paint paint{
         .color = color,

@@ -7,6 +7,9 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
+import 'widgets_app_tester.dart';
+
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
     final key0 = UniqueKey();
@@ -26,33 +29,33 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
   });
 
@@ -74,11 +77,11 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
@@ -86,11 +89,11 @@ void main() {
     // Can't be select because the radio is disabled.
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
   });
 
@@ -243,7 +246,7 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              TextField(focusNode: textFieldBefore),
+              TestTextField(focusNode: textFieldBefore),
               TestRadioGroup<int>(
                 child: Column(
                   children: <Widget>[
@@ -253,7 +256,7 @@ void main() {
                   ],
                 ),
               ),
-              TextField(focusNode: textFieldAfter),
+              TestTextField(focusNode: textFieldAfter),
             ],
           ),
         ),
@@ -412,7 +415,7 @@ void main() {
                   Radio<int>(focusNode: firstRadioFocusNode, value: 0),
                   const RadioListTile<int>(value: 1),
                   const Radio<int>(value: 2),
-                  TextField(focusNode: textFieldFocusNode),
+                  TestTextField(focusNode: textFieldFocusNode),
                 ],
               ),
             ),
@@ -497,6 +500,51 @@ void main() {
     expect(state.groupValue, 0);
     expect(log, isEmpty);
   });
+
+  testWidgets('RadioGroup does not crash at zero area', (WidgetTester tester) async {
+    final focusNode1 = FocusNode();
+    final focusNode2 = FocusNode();
+    addTearDown(focusNode1.dispose);
+    addTearDown(focusNode2.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RadioGroup<int>(
+              onChanged: (_) {},
+              child: Column(
+                children: [
+                  RawRadio<int>(
+                    value: 1,
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+                    toggleable: false,
+                    focusNode: focusNode1,
+                    autofocus: false,
+                    groupRegistry: TestRegistry<int>(),
+                    enabled: true,
+                    builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
+                        const Text('X'),
+                  ),
+                  RawRadio<int>(
+                    value: 2,
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+                    toggleable: false,
+                    focusNode: focusNode2,
+                    autofocus: false,
+                    groupRegistry: TestRegistry<int>(),
+                    enabled: true,
+                    builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
+                        const Text('Y'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioGroup<int>)), Size.zero);
+  });
 }
 
 class TestRadioGroup<T> extends StatefulWidget {
@@ -523,4 +571,20 @@ class TestRadioGroupState<T> extends State<TestRadioGroup<T>> {
       child: widget.child,
     );
   }
+}
+
+class TestRegistry<T> extends RadioGroupRegistry<T> {
+  final Set<RadioClient<T>> clients = <RadioClient<T>>{};
+  @override
+  T? groupValue;
+
+  @override
+  ValueChanged<T?> get onChanged =>
+      (T? newValue) => groupValue = newValue;
+
+  @override
+  void registerClient(RadioClient<T> radio) => clients.add(radio);
+
+  @override
+  void unregisterClient(RadioClient<T> radio) => clients.remove(radio);
 }
