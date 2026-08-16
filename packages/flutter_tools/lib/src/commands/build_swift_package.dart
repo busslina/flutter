@@ -185,7 +185,13 @@ class BuildSwiftPackage extends BuildSubCommand {
     await super.validateCommand();
     _validateTargetPlatform();
     _validateFeatureFlags();
-    _validateXcodeVersion();
+    final Xcode? xcode = _xcode;
+    if (xcode == null || !xcode.isInstalled) {
+      throwToolExit(
+        'Flutter requires Xcode when using Swift Package Manager. Please ensure '
+        'Xcode is installed.',
+      );
+    }
   }
 
   /// Validates the Flutter project supports the [_targetPlatform].
@@ -219,19 +225,6 @@ class BuildSwiftPackage extends BuildSubCommand {
         'Swift Package Manager is disabled. Ensure it is enabled in your global config ("flutter '
         'config --enable-swift-package-manager") and is not disabled in your Flutter '
         "project's pubspec.yaml.",
-      );
-    }
-  }
-
-  /// Validates the Xcode version is equal to or greater than 15.
-  ///
-  /// Throws a [ToolExit] if the Xcoder version is less than 15.
-  void _validateXcodeVersion() {
-    final Version? xcodeVersion = _xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
-      throwToolExit(
-        'Flutter requires Xcode 15 or greater when using Swift Package Manager. Please ensure '
-        'Xcode is installed and meets the version requirements.',
       );
     }
   }
@@ -1258,7 +1251,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       flutterRootDir: _utils.fileSystem.directory(_utils.flutterRoot),
       defines: <String, String>{
         kTargetFile: targetFile,
-        kTargetPlatform: getNameForTargetPlatform(platform.targetPlatform),
+        kTargetPlatform: platform.targetPlatform.getName(),
         ...await _platformDefines(platform, sdk),
         ...buildInfo.toBuildSystemEnvironment(),
         kBuildSwiftPackage: 'true',
@@ -1413,14 +1406,14 @@ class AppFrameworkAndNativeAssetsDependencies {
           kIosArchs: defaultIOSArchsForEnvironment(
             sdk.sdkType,
             _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
           kSdkRoot: await _utils.xcode.sdkLocation(sdk.sdkType),
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             _utils.artifacts,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
         };
     }
   }
@@ -1957,9 +1950,15 @@ class FlutterNativeIntegrationSwiftPackage {
     );
     scriptsTemplate.render(scriptsDirectory, <String, Object>{
       'flutterFrameworkName': _targetPlatform.binaryName,
+      'flutterFrameworkBinaryPath': _targetPlatform == FlutterDarwinPlatform.macos
+          ? 'Versions/A/${_targetPlatform.binaryName}'
+          : _targetPlatform.binaryName,
       'infoPlistPath': _targetPlatform == FlutterDarwinPlatform.macos
           ? 'Versions/A/Resources/Info.plist'
           : 'Info.plist',
+      'appFrameworkBinaryPath': _targetPlatform == FlutterDarwinPlatform.macos
+          ? 'Versions/A/App'
+          : 'App',
     }, printStatusWhenWriting: false);
   }
 
